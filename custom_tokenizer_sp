@@ -1,0 +1,629 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "e6ee4112",
+   "metadata": {
+    "collapsed": true,
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:19.156029Z",
+     "iopub.status.busy": "2025-06-20T10:13:19.155706Z",
+     "iopub.status.idle": "2025-06-20T10:13:36.333733Z",
+     "shell.execute_reply": "2025-06-20T10:13:36.332486Z"
+    },
+    "jupyter": {
+     "outputs_hidden": true
+    },
+    "papermill": {
+     "duration": 17.184766,
+     "end_time": "2025-06-20T10:13:36.335642",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:19.150876",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: transformers in /usr/local/lib/python3.11/dist-packages (4.51.3)\r\n",
+      "Collecting transformers\r\n",
+      "  Downloading transformers-4.52.4-py3-none-any.whl.metadata (38 kB)\r\n",
+      "Requirement already satisfied: sentencepiece in /usr/local/lib/python3.11/dist-packages (0.2.0)\r\n",
+      "Requirement already satisfied: filelock in /usr/local/lib/python3.11/dist-packages (from transformers) (3.18.0)\r\n",
+      "Requirement already satisfied: huggingface-hub<1.0,>=0.30.0 in /usr/local/lib/python3.11/dist-packages (from transformers) (0.31.1)\r\n",
+      "Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.11/dist-packages (from transformers) (1.26.4)\r\n",
+      "Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.11/dist-packages (from transformers) (25.0)\r\n",
+      "Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.11/dist-packages (from transformers) (6.0.2)\r\n",
+      "Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.11/dist-packages (from transformers) (2024.11.6)\r\n",
+      "Requirement already satisfied: requests in /usr/local/lib/python3.11/dist-packages (from transformers) (2.32.3)\r\n",
+      "Requirement already satisfied: tokenizers<0.22,>=0.21 in /usr/local/lib/python3.11/dist-packages (from transformers) (0.21.1)\r\n",
+      "Requirement already satisfied: safetensors>=0.4.3 in /usr/local/lib/python3.11/dist-packages (from transformers) (0.5.3)\r\n",
+      "Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.11/dist-packages (from transformers) (4.67.1)\r\n",
+      "Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.11/dist-packages (from huggingface-hub<1.0,>=0.30.0->transformers) (2025.3.2)\r\n",
+      "Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.11/dist-packages (from huggingface-hub<1.0,>=0.30.0->transformers) (4.13.2)\r\n",
+      "Requirement already satisfied: hf-xet<2.0.0,>=1.1.0 in /usr/local/lib/python3.11/dist-packages (from huggingface-hub<1.0,>=0.30.0->transformers) (1.1.0)\r\n",
+      "Requirement already satisfied: mkl_fft in /usr/local/lib/python3.11/dist-packages (from numpy>=1.17->transformers) (1.3.8)\r\n",
+      "Requirement already satisfied: mkl_random in /usr/local/lib/python3.11/dist-packages (from numpy>=1.17->transformers) (1.2.4)\r\n",
+      "Requirement already satisfied: mkl_umath in /usr/local/lib/python3.11/dist-packages (from numpy>=1.17->transformers) (0.1.1)\r\n",
+      "Requirement already satisfied: mkl in /usr/local/lib/python3.11/dist-packages (from numpy>=1.17->transformers) (2025.1.0)\r\n",
+      "Requirement already satisfied: tbb4py in /usr/local/lib/python3.11/dist-packages (from numpy>=1.17->transformers) (2022.1.0)\r\n",
+      "Requirement already satisfied: mkl-service in /usr/local/lib/python3.11/dist-packages (from numpy>=1.17->transformers) (2.4.1)\r\n",
+      "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.11/dist-packages (from requests->transformers) (3.4.2)\r\n",
+      "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.11/dist-packages (from requests->transformers) (3.10)\r\n",
+      "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.11/dist-packages (from requests->transformers) (2.4.0)\r\n",
+      "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.11/dist-packages (from requests->transformers) (2025.4.26)\r\n",
+      "Requirement already satisfied: intel-openmp<2026,>=2024 in /usr/local/lib/python3.11/dist-packages (from mkl->numpy>=1.17->transformers) (2024.2.0)\r\n",
+      "Requirement already satisfied: tbb==2022.* in /usr/local/lib/python3.11/dist-packages (from mkl->numpy>=1.17->transformers) (2022.1.0)\r\n",
+      "Requirement already satisfied: tcmlib==1.* in /usr/local/lib/python3.11/dist-packages (from tbb==2022.*->mkl->numpy>=1.17->transformers) (1.3.0)\r\n",
+      "Requirement already satisfied: intel-cmplr-lib-rt in /usr/local/lib/python3.11/dist-packages (from mkl_umath->numpy>=1.17->transformers) (2024.2.0)\r\n",
+      "Requirement already satisfied: intel-cmplr-lib-ur==2024.2.0 in /usr/local/lib/python3.11/dist-packages (from intel-openmp<2026,>=2024->mkl->numpy>=1.17->transformers) (2024.2.0)\r\n",
+      "Downloading transformers-4.52.4-py3-none-any.whl (10.5 MB)\r\n",
+      "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m10.5/10.5 MB\u001b[0m \u001b[31m70.4 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\r\n",
+      "\u001b[?25hInstalling collected packages: transformers\r\n",
+      "  Attempting uninstall: transformers\r\n",
+      "    Found existing installation: transformers 4.51.3\r\n",
+      "    Uninstalling transformers-4.51.3:\r\n",
+      "      Successfully uninstalled transformers-4.51.3\r\n",
+      "Successfully installed transformers-4.52.4\r\n"
+     ]
+    }
+   ],
+   "source": [
+    "!pip install -U transformers sentencepiece"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "624fd1f3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:36.345927Z",
+     "iopub.status.busy": "2025-06-20T10:13:36.345586Z",
+     "iopub.status.idle": "2025-06-20T10:13:36.350754Z",
+     "shell.execute_reply": "2025-06-20T10:13:36.349728Z"
+    },
+    "papermill": {
+     "duration": 0.012142,
+     "end_time": "2025-06-20T10:13:36.352663",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.340521",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import os"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "de194dae",
+   "metadata": {
+    "papermill": {
+     "duration": 0.003557,
+     "end_time": "2025-06-20T10:13:36.360314",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.356757",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# prepare data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "2cc58bd2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:36.369598Z",
+     "iopub.status.busy": "2025-06-20T10:13:36.369237Z",
+     "iopub.status.idle": "2025-06-20T10:13:36.374134Z",
+     "shell.execute_reply": "2025-06-20T10:13:36.373232Z"
+    },
+    "papermill": {
+     "duration": 0.011498,
+     "end_time": "2025-06-20T10:13:36.375816",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.364318",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# load data\n",
+    "root_path = '/kaggle/input/kannada-wikipedia-articles'\n",
+    "train_folder_path = 'train/train'\n",
+    "test_folder_path = 'valid/valid'"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "b4cdc1cc",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:36.384821Z",
+     "iopub.status.busy": "2025-06-20T10:13:36.384512Z",
+     "iopub.status.idle": "2025-06-20T10:13:36.389039Z",
+     "shell.execute_reply": "2025-06-20T10:13:36.388264Z"
+    },
+    "papermill": {
+     "duration": 0.011033,
+     "end_time": "2025-06-20T10:13:36.390865",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.379832",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def load_file(root_path, file_name,folder):\n",
+    "    file_path = os.path.join(root_path, folder, file_name)\n",
+    "    with open(file_path, 'r', encoding='utf-8') as f:\n",
+    "        data = f.read()\n",
+    "    return data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "ccfb8b20",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:36.399844Z",
+     "iopub.status.busy": "2025-06-20T10:13:36.399531Z",
+     "iopub.status.idle": "2025-06-20T10:13:36.612245Z",
+     "shell.execute_reply": "2025-06-20T10:13:36.611349Z"
+    },
+    "papermill": {
+     "duration": 0.219358,
+     "end_time": "2025-06-20T10:13:36.614090",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.394732",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Total training files:  26397\n",
+      "Example file:\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "'ಅಬ್ಬೆ ದ್ಯುಬುವಾ ಅವರು ಫ್ರಾನ್ಸ್ ದೇಶದವರಾಗಿದ್ದು ಸಾನ್ ರಿಮೇಝ್ ಎಂಬ ಹಳ್ಳಿಯಲ್ಲಿ ೧೭೬೫ ರಲ್ಲಿ ಜನಿಸಿದರು. ವಯಸ್ಕರಾದಾಗ ಪ್ಯಾರಿಸ್ಸಿನ ಹೊರನಾಡು ಧರ್ಮಪ್ರಚಾರ ಸಂಸ್ಥೆ ಗೆ ಸೇರಿ ೧೭೯೧ರಲ್ಲಿ ಗುರುಪಟ್ಟ ಪಡೆದ ಅವರು ಅದರ ಮರುವರ್ಷವೇ ಅಂದರೆ ಫ್ರೆಂಚ್ ಚಳುವಳಿಯ ಕಿಡಿ ಸ್ಫೋಟವಾಗುವ ಹೊತ್ತಿಗೆ ಮಲಬಾರ್ ಮಿಷನ್ನಿಗೆ ನಿಯುಕ್ತರಾಗಿ ಇಂಡಿಯಾ ದೇಶಕ್ಕೆ ಕ್ರಿಶ್ಚಿಯನ್ ಧರ್ಮಬೋಧನೆ ಮಾಡಲು ತೆರಳಿದರು.\\nಪ್ಯಾರಿಸ್ಸಿಗೆ ಹಿಂದಿರುಗಿದ ಮೇಲೆ ಅಬ್ಬೆ ದ್ಯುಬುವಾ ಅವರು ಎಂಇಪಿ ಸಂಸ್ಥೆಯ ನಿರ್ದೇಶಕರಾದರು. ರಾಯಲ್ ಸೊಸೈಟಿ ಆಫ್ ಗ್ರೇಟ್ ಬ್ರಿಟನ್ ಮತ್ತು ಪ್ಯಾರಿಸ್ ಗಳ ಸದಸ್ಯರೂ ಆಗಿದ್ದ ಅವರು ನಮ್ಮ ದೇಶದ ಸಾಂಸ್ಕೃತಿಕ ಅಧ್ಯಯನಕ್ಕೆ ಹಲವು ಕೊಡುಗೆಗಳನ್ನು ನೀಡಿದರು. ಹೀಗೆ ಒಂದು ಗೌರವಾನ್ವಿತ ಬದುಕು ಬಾಳಿದ ಫಾದರ್ ಅಬ್ಬೆ ದ್ಯುಬುವಾ ಅವರು ೧೮೪೮ರ ಫೆಬ್ರವರಿ ೧೭ರಂದು ಸ್ವರ್ಗಸಾಮ್ರಾಜ್ಯ ಸೇರಿದರು. \\n'"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "files = os.listdir(os.path.join(root_path, train_folder_path))\n",
+    "print(\"Total training files: \", len(files))\n",
+    "print('Example file:')\n",
+    "load_file(root_path, files[0], train_folder_path)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "70ea2a9a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:36.623852Z",
+     "iopub.status.busy": "2025-06-20T10:13:36.623568Z",
+     "iopub.status.idle": "2025-06-20T10:13:36.685757Z",
+     "shell.execute_reply": "2025-06-20T10:13:36.684829Z"
+    },
+    "papermill": {
+     "duration": 0.068718,
+     "end_time": "2025-06-20T10:13:36.687158",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.618440",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Total training files:  6600\n",
+      "Example file:\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "'ಲಕ್ಷ್ಮಿ ಸರಸ್ವತಿ, ಕೆ.ಎಸ್.ಎಲ್.ಸ್ವಾಮಿ ನಿರ್ದೇಶನ ಮತ್ತು ಬಿ.ಹೆಚ್.ಜಯಣ್ಣ ನಿರ್ಮಾಪಣ ಮಾಡಿರುವ ೧೯೭೦ರ ಕನ್ನಡ ಚಲನಚ್ರಿತ್ರ. ಈ ಚಿತ್ರಕ್ಕೆ ವಿಜಯಭಾಸ್ಕರ್ ಸಂಗೀತ ನಿರ್ದೇಶನ ಮಾಡಿದ್ದಾರೆ. ರಮೇಶ್, ನರಸಿಂಹರಾಜು ಮತ್ತು ಬಿ.ಸರೋಜಾದೇವಿ ಮುಖ್ಯ ಪಾತ್ರಗಳಲ್ಲಿ ನಟಿಸಿದ್ದಾರೆ.\\n'"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "files = os.listdir(os.path.join(root_path, test_folder_path))\n",
+    "print(\"Total training files: \", len(files))\n",
+    "print('Example file:')\n",
+    "load_file(root_path, files[0], test_folder_path)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "8b6f9b69",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:36.697059Z",
+     "iopub.status.busy": "2025-06-20T10:13:36.696425Z",
+     "iopub.status.idle": "2025-06-20T10:13:36.702316Z",
+     "shell.execute_reply": "2025-06-20T10:13:36.701372Z"
+    },
+    "papermill": {
+     "duration": 0.012539,
+     "end_time": "2025-06-20T10:13:36.703887",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.691348",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# combie all files from both train and test data\n",
+    "\n",
+    "def combine_all_files(root_path, folders):\n",
+    "    for folder in folders:\n",
+    "        files = os.listdir(os.path.join(root_path, train_folder_path))\n",
+    "        combined_text = \"\"\n",
+    "        for file in files:\n",
+    "            if file.endswith('.txt'):\n",
+    "                file_content = load_file(root_path, file, train_folder_path)\n",
+    "                combined_text += \"|<startoftext>|\" + file_content +\"|<endoftext>|\" + \"\\n\"\n",
+    "    with open(f'/kaggle/working/combined_train_valid.txt', 'w', encoding='utf-8') as f:\n",
+    "        f.write(combined_text)\n",
+    "        print('Saved data')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "267819e9",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:13:36.713630Z",
+     "iopub.status.busy": "2025-06-20T10:13:36.713264Z",
+     "iopub.status.idle": "2025-06-20T10:15:23.795630Z",
+     "shell.execute_reply": "2025-06-20T10:15:23.794426Z"
+    },
+    "papermill": {
+     "duration": 107.092786,
+     "end_time": "2025-06-20T10:15:23.800940",
+     "exception": false,
+     "start_time": "2025-06-20T10:13:36.708154",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Saved data\n"
+     ]
+    }
+   ],
+   "source": [
+    "combine_all_files(root_path, [train_folder_path,test_folder_path])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "288e727f",
+   "metadata": {
+    "papermill": {
+     "duration": 0.004406,
+     "end_time": "2025-06-20T10:15:23.809936",
+     "exception": false,
+     "start_time": "2025-06-20T10:15:23.805530",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# Train sentencepiece model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "eea8f147",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:15:23.820010Z",
+     "iopub.status.busy": "2025-06-20T10:15:23.819677Z",
+     "iopub.status.idle": "2025-06-20T10:15:23.857962Z",
+     "shell.execute_reply": "2025-06-20T10:15:23.856957Z"
+    },
+    "papermill": {
+     "duration": 0.045442,
+     "end_time": "2025-06-20T10:15:23.859700",
+     "exception": false,
+     "start_time": "2025-06-20T10:15:23.814258",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import sentencepiece as spm"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "1bd80b9c",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:15:23.869410Z",
+     "iopub.status.busy": "2025-06-20T10:15:23.869063Z",
+     "iopub.status.idle": "2025-06-20T10:15:23.873769Z",
+     "shell.execute_reply": "2025-06-20T10:15:23.872933Z"
+    },
+    "papermill": {
+     "duration": 0.01137,
+     "end_time": "2025-06-20T10:15:23.875223",
+     "exception": false,
+     "start_time": "2025-06-20T10:15:23.863853",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Path to your Kannada text corpus\n",
+    "trainer_file = f'/kaggle/working/combined_train_valid.txt'\n",
+    "model_prefix = \"kannada_sp_16000\"\n",
+    "vocab_size = 16000  # Adjust the vocabulary size as needed\n",
+    "# we will have .model and vocab files."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "21ca5658",
+   "metadata": {
+    "collapsed": true,
+    "execution": {
+     "iopub.execute_input": "2025-06-20T10:15:23.885069Z",
+     "iopub.status.busy": "2025-06-20T10:15:23.884758Z",
+     "iopub.status.idle": "2025-06-20T10:20:18.147127Z",
+     "shell.execute_reply": "2025-06-20T10:20:18.146148Z"
+    },
+    "jupyter": {
+     "outputs_hidden": true
+    },
+    "papermill": {
+     "duration": 294.273015,
+     "end_time": "2025-06-20T10:20:18.152608",
+     "exception": false,
+     "start_time": "2025-06-20T10:15:23.879593",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "sentencepiece_trainer.cc(78) LOG(INFO) Starts training with : \n",
+      "trainer_spec {\n",
+      "  input: /kaggle/working/combined_train_valid.txt\n",
+      "  input_format: \n",
+      "  model_prefix: kannada_sp_16000\n",
+      "  model_type: UNIGRAM\n",
+      "  vocab_size: 16000\n",
+      "  self_test_sample_size: 0\n",
+      "  character_coverage: 1\n",
+      "  input_sentence_size: 0\n",
+      "  shuffle_input_sentence: 1\n",
+      "  seed_sentencepiece_size: 1000000\n",
+      "  shrinking_factor: 0.75\n",
+      "  max_sentence_length: 4192\n",
+      "  num_threads: 4\n",
+      "  num_sub_iterations: 2\n",
+      "  max_sentencepiece_length: 16\n",
+      "  split_by_unicode_script: 1\n",
+      "  split_by_number: 1\n",
+      "  split_by_whitespace: 1\n",
+      "  split_digits: 0\n",
+      "  pretokenization_delimiter: \n",
+      "  treat_whitespace_as_suffix: 0\n",
+      "  allow_whitespace_only_pieces: 0\n",
+      "  user_defined_symbols: |<startoftext>|\n",
+      "  user_defined_symbols: |<endoftext>|\n",
+      "  required_chars: \n",
+      "  byte_fallback: 0\n",
+      "  vocabulary_output_piece_score: 1\n",
+      "  train_extremely_large_corpus: 0\n",
+      "  seed_sentencepieces_file: \n",
+      "  hard_vocab_limit: 1\n",
+      "  use_all_vocab: 0\n",
+      "  unk_id: 0\n",
+      "  bos_id: 1\n",
+      "  eos_id: 2\n",
+      "  pad_id: -1\n",
+      "  unk_piece: <unk>\n",
+      "  bos_piece: <s>\n",
+      "  eos_piece: </s>\n",
+      "  pad_piece: <pad>\n",
+      "  unk_surface:  ⁇ \n",
+      "  enable_differential_privacy: 0\n",
+      "  differential_privacy_noise_level: 0\n",
+      "  differential_privacy_clipping_threshold: 0\n",
+      "}\n",
+      "normalizer_spec {\n",
+      "  name: nmt_nfkc\n",
+      "  add_dummy_prefix: 1\n",
+      "  remove_extra_whitespaces: 1\n",
+      "  escape_whitespaces: 1\n",
+      "  normalization_rule_tsv: \n",
+      "}\n",
+      "denormalizer_spec {}\n",
+      "trainer_interface.cc(353) LOG(INFO) SentenceIterator is not specified. Using MultiFileSentenceIterator.\n",
+      "trainer_interface.cc(185) LOG(INFO) Loading corpus: /kaggle/working/combined_train_valid.txt\n",
+      "trainer_interface.cc(380) LOG(WARNING) Found too long line (9412 > 4192).\n",
+      "trainer_interface.cc(382) LOG(WARNING) Too long lines are skipped in the training.\n",
+      "trainer_interface.cc(383) LOG(WARNING) The maximum length can be changed with --max_sentence_length=<size> flag.\n",
+      "trainer_interface.cc(409) LOG(INFO) Loaded all 259731 sentences\n",
+      "trainer_interface.cc(416) LOG(INFO) Skipped 6550 too long sentences.\n",
+      "trainer_interface.cc(425) LOG(INFO) Adding meta_piece: <unk>\n",
+      "trainer_interface.cc(425) LOG(INFO) Adding meta_piece: <s>\n",
+      "trainer_interface.cc(425) LOG(INFO) Adding meta_piece: </s>\n",
+      "trainer_interface.cc(425) LOG(INFO) Adding meta_piece: |<startoftext>|\n",
+      "trainer_interface.cc(425) LOG(INFO) Adding meta_piece: |<endoftext>|\n",
+      "trainer_interface.cc(430) LOG(INFO) Normalizing sentences...\n",
+      "trainer_interface.cc(539) LOG(INFO) all chars count=82927130\n",
+      "trainer_interface.cc(550) LOG(INFO) Done: 100% characters are covered.\n",
+      "trainer_interface.cc(560) LOG(INFO) Alphabet size=1152\n",
+      "trainer_interface.cc(561) LOG(INFO) Final character coverage=1\n",
+      "trainer_interface.cc(592) LOG(INFO) Done! preprocessed 258987 sentences.\n",
+      "unigram_model_trainer.cc(265) LOG(INFO) Making suffix array...\n",
+      "unigram_model_trainer.cc(269) LOG(INFO) Extracting frequent sub strings... node_num=44272105\n",
+      "unigram_model_trainer.cc(312) LOG(INFO) Initialized 1001152 seed sentencepieces\n",
+      "trainer_interface.cc(598) LOG(INFO) Tokenizing input sentences with whitespace: 258987\n",
+      "trainer_interface.cc(609) LOG(INFO) Done! 1130806\n",
+      "unigram_model_trainer.cc(602) LOG(INFO) Using 1130806 sentences for EM training\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=391844 obj=16.1427 num_tokens=2752677 num_tokens/piece=7.02493\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=321821 obj=13.3025 num_tokens=2761361 num_tokens/piece=8.58043\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=241205 obj=13.27 num_tokens=2810609 num_tokens/piece=11.6524\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=240499 obj=13.2437 num_tokens=2813613 num_tokens/piece=11.6991\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=180354 obj=13.3065 num_tokens=2902827 num_tokens/piece=16.0952\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=180331 obj=13.2855 num_tokens=2903319 num_tokens/piece=16.0999\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=135243 obj=13.4188 num_tokens=3020490 num_tokens/piece=22.3338\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=135242 obj=13.3863 num_tokens=3020758 num_tokens/piece=22.3359\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=101431 obj=13.5712 num_tokens=3142915 num_tokens/piece=30.9857\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=101431 obj=13.5229 num_tokens=3143142 num_tokens/piece=30.988\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=76073 obj=13.7554 num_tokens=3269942 num_tokens/piece=42.9843\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=76073 obj=13.7002 num_tokens=3270115 num_tokens/piece=42.9865\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=57054 obj=13.9694 num_tokens=3400783 num_tokens/piece=59.6064\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=57054 obj=13.9092 num_tokens=3400916 num_tokens/piece=59.6087\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=42790 obj=14.2186 num_tokens=3538512 num_tokens/piece=82.6948\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=42790 obj=14.1515 num_tokens=3538704 num_tokens/piece=82.6993\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=32092 obj=14.5045 num_tokens=3685701 num_tokens/piece=114.848\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=32092 obj=14.4275 num_tokens=3685865 num_tokens/piece=114.853\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=24069 obj=14.8289 num_tokens=3847283 num_tokens/piece=159.844\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=24069 obj=14.7406 num_tokens=3847480 num_tokens/piece=159.852\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=18051 obj=15.2017 num_tokens=4033860 num_tokens/piece=223.47\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=18051 obj=15.1015 num_tokens=4034098 num_tokens/piece=223.483\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=0 size=17600 obj=15.1397 num_tokens=4054087 num_tokens/piece=230.346\n",
+      "unigram_model_trainer.cc(618) LOG(INFO) EM sub_iter=1 size=17600 obj=15.1297 num_tokens=4054691 num_tokens/piece=230.38\n",
+      "trainer_interface.cc(687) LOG(INFO) Saving model: kannada_sp_16000.model\n",
+      "trainer_interface.cc(699) LOG(INFO) Saving vocabs: kannada_sp_16000.vocab\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Train the SentencePiece tokenizer\n",
+    "spm.SentencePieceTrainer.train(\n",
+    "    input=trainer_file,\n",
+    "    model_prefix=model_prefix,\n",
+    "    vocab_size=vocab_size,\n",
+    "    model_type=\"unigram\",\n",
+    "    user_defined_symbols=[\"|<startoftext>|\", \"|<endoftext>|\"],\n",
+    "    character_coverage=1.0,\n",
+    "    num_threads=4\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7d82fc36",
+   "metadata": {
+    "papermill": {
+     "duration": 0.004181,
+     "end_time": "2025-06-20T10:20:18.162101",
+     "exception": false,
+     "start_time": "2025-06-20T10:20:18.157920",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [
+    {
+     "datasetId": 455490,
+     "sourceId": 859190,
+     "sourceType": "datasetVersion"
+    }
+   ],
+   "dockerImageVersionId": 31040,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.11"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 424.709889,
+   "end_time": "2025-06-20T10:20:18.696860",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2025-06-20T10:13:13.986971",
+   "version": "2.6.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
